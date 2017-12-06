@@ -22,7 +22,7 @@ class ReadChipscope{
     std::vector<int> convertStringToInt(std::vector<std::string>& inputString, std::vector<int>& output);
     void readPrnFile(std::fstream& myFile, char delimiterChar, int beginData, int endData, std::vector<std::vector<int>> &outputImageVectorised);
     void splitString(const std::string &inputString, char delimiterChar, std::vector<std::string> &outputVector);
-    std::vector<std::vector<int>> getChipscopeDisplay(int dataToRead, int dataStart, int dataLength, std::vector<std::vector<int>> input);
+    std::vector<std::vector<int>> getChipscopeDisplay(int dataToRead, const int dataStart, const int dataLength, std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> getADCInfo(std::vector<std::vector<int>> input, int adcPartBegin, int adcPartEnd, int bitsLength, int rowGroupDataLength);
 
     std::vector<std::vector<int>> getGainBits(std::vector<std::vector<int>> input);

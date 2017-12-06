@@ -62,6 +62,15 @@ int main (int argc, char **argv){
   std::cout << "Size of fineDec: " << fineDec.size() << std::endl;
   std::cout << "Size of coarseDecimals: " << coarseDecimals.size() << std::endl;
   std::cout << "Size of coarseDec: " << coarseDec.size() << std::endl;
-  
+ 
+  std::vector<std::vector<int>> tmpVec = chipscopeData.prepareVectorisedImage(coarseDecimals);
+  std::vector<std::vector<int>> tmpVec2 = chipscopeData.prepareVectorisedImage(coarseDec);
+  std::cout << "Size of image: " << tmpVec.size() << "; " << tmpVec[0].size() << std::endl;
+
+  auto outputRootFile = TFile::Open("test.root", "RECREATE");
+  PlotHistogram test;
+  test.CreateScatterPlot("Test", "Test", 7, 0, 7, 1408, 0, 1408, tmpVec);
+  test.CreateScatterPlot("Test2", "Test2", 7, 0, 7, 1408, 0, 1408, tmpVec2);
+  outputRootFile->Close(); 
   return 0;
 }

@@ -40,10 +40,10 @@ ReadChipscope::~ReadChipscope(){
   // DESTRUCTOR
 }
 
-std::vector<std::vector<int>> ReadChipscope::getChipscopeDisplay(int dataToRead, int dataStart, int dataLength, std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::getChipscopeDisplay(int dataToRead, const int dataStart, const int dataLength, std::vector<std::vector<int>> input){
   // The different data (SAMPLE or RESET) are 3360 bits long but there is an offset in chipscope 
-  int begin = m_dataStart + dataToRead * (m_dataLength); 
-  int end  = begin + m_dataLength;
+  int begin = dataStart + dataToRead * (dataLength); 
+  int end  = begin + dataLength;
   std::vector<std::vector<int>> chipscopeDisplay(input.begin() + begin, input.begin() + end);
   return chipscopeDisplay;
 }

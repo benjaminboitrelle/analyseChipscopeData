@@ -13,41 +13,59 @@
 #include <algorithm>
 #include <utility>
 
+#include "TFile.h"
+
 #include "readChipscope.hpp"
+#include "plotHistogram.hpp"
+
+#include "xmlReader/tinyxml2.h"
+
+using namespace tinyxml2;
 
 int main (int argc, char **argv){
-  //const std::string INPUT_FILE  = "/home/ben/Documents/P2M_lightResponse/OD0.0.prn";
-  const std::string INPUT_FILE  = "/home/ben/Documents/P2M_lightResponse/referencePSVolt.prn";
-  //const int dataLength  = 3360;
 
+  XMLDocument configFileXML;
+  XMLError errorResult = configFileXML.LoadFile("test.xml");
+  if (errorResult != XML_SUCCESS){
+    std::cerr << "ERROR! Could not find XML file to read." << std::endl;
+    return 1;
+  }
+  
+  const std::string INPUT_FILE = configFileXML.FirstChildElement("FILE")->FirstChildElement("INPUT")->GetText();
+  if (INPUT_FILE == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+
+  const std::string OUTPUT_ROOT = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_ROOT")->GetText();
+  if (OUTPUT_ROOT == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+
+//  const std::string OUTPUT_PNG = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_PNG")->GetText();
+//  if (OUTPUT_PNG == nullptr){
+//    std::cerr << "Field not found." << std::endl;
+//    return 1;
+//  }
+//
+//  const std::string OUTPUT_ROOT = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_ROOT")->GetText();
+//  if (OUTPUT_ROOT == nullptr){
+//    std::cerr << "Field not found." << std::endl;
+//    return 1;
+//  }
   std::fstream myfile(INPUT_FILE);
-  std::vector<std::vector<int>> rawData;
+  //std::vector<std::vector<int>> rawData;
 
   ReadChipscope chipscopeData;
-  chipscopeData.readPrnFile(myfile, rawData);
+ // chipscopeData.readPrnFile(myfile, rawData);
+  std::vector<std::vector<int>> rawData = chipscopeData.readPrnFile(myfile);
 
   //std::cout << "Size of raw Data: number of columns: " << rawData[0].size() << ", number of lines: " << rawData.size() << std::endl;
-  
+
   //std::vector<std::vector<int>> tmp(&rawData[0], &rawData[3360]);
-  std::vector<std::vector<int>> tmp = chipscopeData.getChipscopeDisplay(0, rawData);
-
- // std::cout << "Size of tmp vector: number of columns: " << tmp[0].size() << ", number of lines: " << tmp.size() << std::endl; 
- // for (unsigned int i = 0; i < tmp.size(); i++){
- //   for (unsigned int  j = 0; j < tmp[i].size(); j++){
- //     std::cout << tmp[i][j] << " ";
- //   }
- //   std::cout << std::endl;  
- // }
-
-  //std::cout << "GAIN BITS :: \n\n\n";
-
+  std::vector<std::vector<int>> tmp = chipscopeData.getChipscopeDisplay(2, rawData);
   std::vector<std::vector<int>> gainBits = chipscopeData.getGainBits(tmp);
-  //for (unsigned int i = 0; i < gainBits.size(); i++){
-  //  for (unsigned int  j = 0; j < gainBits[i].size(); j++){
-  //    std::cout << gainBits[i][j] << " ";
-  //  }
-  //  std::cout << std::endl;  
-  //}
   std::vector<std::vector<int>> fineBits = chipscopeData.getFineBits(tmp);
   std::vector<std::vector<int>> coarseBits = chipscopeData.getCoarseBits(tmp);
   std::vector<std::vector<int>> gainDecimals = chipscopeData.getGainDecimals(gainBits);
@@ -58,10 +76,30 @@ int main (int argc, char **argv){
   std::cout << "Size of fineDecimals: " << fineDecimals.size() << std::endl;
   std::cout << "Size of coarseDecimals: " << coarseDecimals.size() << std::endl;
 
-  //for (auto row : coarseDecimals){
-  //  for (auto col : row){
-  //    std::cout << col << std::endl;  
-  //  }  
+  //for (auto row : coarseBits){
+  //  for (auto column : row){
+  //  std::cout << column << " ";
+  //  }
+  //  std::cout << std::endl;  
   //}
+
+  std::vector<std::vector<int>> tmpVec = chipscopeData.prepareVectorisedImage(coarseDecimals);
+  std::cout << "Size of image: " << tmpVec.size() << "; " << tmpVec[0].size() << std::endl;
+
+ // for (unsigned int row = 0; row < tmpVec.size(); row++){
+ //   for (unsigned int column = 0; column < tmpVec[row].size(); column++){
+ //    std::cout << tmpVec[row][column] << " ";  
+ //   }
+ //   std::cout << std::endl;  
+ // }
+
+  //auto outputRootFile = TFile::Open("/home/ben/analyseChipscopeData/output/test.root", "RECREATE");
+  auto outputRootFile = TFile::Open(OUTPUT_ROOT.c_str(), "RECREATE");
+  PlotHistogram test;
+  test.CreateScatterPlot("Test", "Test", 7, 0, 7, 1408, 0, 1408, tmpVec);
+  outputRootFile->Close();
+
+
+
   return 0;
 }

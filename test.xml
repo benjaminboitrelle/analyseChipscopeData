@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf8"?>
+
+<FILE>
+  <INPUT>/home/ben/Documents/001/0,003,004_P2Mchp.prn</INPUT>
+  <OUTPUT_ROOT>/home/ben/analyseChipscopeData/output/test.root</OUTPUT_ROOT>
+</FILE>

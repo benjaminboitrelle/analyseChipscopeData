@@ -139,22 +139,42 @@ std::vector<int> ReadChipscope::convertStringToInt(std::vector<std::string>& inp
       });
   return output;
 }
-
-void ReadChipscope::readPrnFile(std::fstream& myFile, std::vector<std::vector<int>> &outputImageVectorised){
+std::vector<std::vector<int>> ReadChipscope::readPrnFile(std::fstream& myFile){
   // Open a .prn file produced by Chipscope and store its element in a 2D vector of int
 
   std::string outputLine;
   myFile.ignore ( std::numeric_limits<std::streamsize>::max(), '\n' );
+  std::vector<std::vector<int>> outputImageVectorised;
   while (std::getline(myFile, outputLine)){
     std::vector<std::string> result;
     splitString(outputLine, '\t', result);
     std::vector<std::string> tmpResult(&result[3], &result[47]); // H0_0 starts at the 3rd position and H1_21 is at the 47 position
     std::vector<int> resultIntFormat(tmpResult.size());
     convertStringToInt(tmpResult, resultIntFormat);
+    //inverseBits(resultIntFormat);
+    for (auto &bit : resultIntFormat) (bit == 0)? bit = 1 : bit = 0;
     outputImageVectorised.push_back(resultIntFormat);
   }
   m_chipscopeLength = (int)outputImageVectorised.size();
+  return outputImageVectorised;
 }
+//void ReadChipscope::readPrnFile(std::fstream& myFile, std::vector<std::vector<int>> &outputImageVectorised){
+//  // Open a .prn file produced by Chipscope and store its element in a 2D vector of int
+//
+//  std::string outputLine;
+//  myFile.ignore ( std::numeric_limits<std::streamsize>::max(), '\n' );
+//  while (std::getline(myFile, outputLine)){
+//    std::vector<std::string> result;
+//    splitString(outputLine, '\t', result);
+//    std::vector<std::string> tmpResult(&result[3], &result[47]); // H0_0 starts at the 3rd position and H1_21 is at the 47 position
+//    std::vector<int> resultIntFormat(tmpResult.size());
+//    convertStringToInt(tmpResult, resultIntFormat);
+//    //inverseBits(resultIntFormat);
+//    for (auto &bit : resultIntFormat) (bit == 0)? bit = 1 : bit = 0;
+//    outputImageVectorised.push_back(resultIntFormat);
+//  }
+//  m_chipscopeLength = (int)outputImageVectorised.size();
+//}
 
 void ReadChipscope::splitString(const std::string& inputString, char delimiterChar, std::vector<std::string> &outputVector){
   // Split a string according to a define delimiter and save it into a vector
@@ -169,4 +189,46 @@ void ReadChipscope::splitString(const std::string& inputString, char delimiterCh
     if (j == std::string::npos) outputVector.push_back(inputString.substr(i, inputString.length()));
   }
 
+}
+
+std::vector<std::vector<int>> ReadChipscope::prepareVectorisedImage(std::vector<std::vector<int>> input){
+  // Transform the vector of data into a 2D matrix to get the response of a row group 
+
+  std::vector<std::vector<int>> outputImage;
+  int lineLength = 7;
+  int columnLength = 1408;
+  outputImage.resize(lineLength);
+  for (int i = 0; i <lineLength; ++i){
+    outputImage[i].resize(columnLength);
+  }
+  int columnSize  = 31;
+  for (unsigned int column = 0; column < input[0].size(); column++){
+    int tmpRow = -1;
+    int tmpCol =  column + columnSize * column;
+    for (unsigned int row = 0; row < input.size(); row++){
+      if (row % 32 == 0){
+        tmpRow++;
+        tmpCol = column + columnSize*column;
+        //std::cout << tmpRow << ":" << tmpCol << " ";
+        //tmpCol = column;
+        outputImage[tmpRow][tmpCol] = input[row][column];
+      }
+      else{
+        outputImage[tmpRow][tmpCol] = input[row][column];
+        tmpCol++;
+        //std::cout << tmpRow << ":" << tmpCol << " ";
+      }
+    }  
+    //std::cout << std::endl;
+  }
+
+  return outputImage;
+}
+
+void ReadChipscope::inverseBits(std::vector<int> input){
+  // Translate the english bit convention to the european one
+
+    for (auto &bit : input){
+      bit == 0 ? bit = 1 : bit = 0;
+    }
 }

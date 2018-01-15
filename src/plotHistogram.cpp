@@ -21,6 +21,8 @@
 #include "TH2F.h"
 #include "TCanvas.h"
 #include "TStyle.h"
+#include "TAxis.h"
+#include "TGaxis.h"
 
 PlotHistogram::PlotHistogram(){
   // Constructor
@@ -42,6 +44,45 @@ void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle,
   }
   gStyle->SetPalette(kRainBow);
   histoToPlot->Draw("COLZ");
-  histoToPlot->Write();  
+  ReverseYAxis(histoToPlot);
+  ReverseXAxis(histoToPlot);
+  histoToPlot->Write();
   canvas->SaveAs("/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/result.png");
+}
+
+void PlotHistogram::ReverseXAxis(TH2F *histo2D){
+  // Remove the current axis
+  histo2D->GetXaxis()->SetLabelOffset(999);
+  histo2D->GetXaxis()->SetTickLength(0);
+  
+  // Redraw the new axis
+  gPad->Update();
+  TGaxis *newaxis = new TGaxis(gPad->GetUxmax(),
+                               gPad->GetUymin(),
+                               gPad->GetUxmin(),
+                               gPad->GetUymin(),
+                               histo2D->GetXaxis()->GetXmin(),
+                               histo2D->GetXaxis()->GetXmax(),
+                               510,
+                               "-");
+  newaxis->SetLabelOffset(-0.03);
+  newaxis->Draw();
+}
+
+void PlotHistogram:: ReverseYAxis(TH2F *histo2D){
+  // Remove the current axis
+  histo2D->GetYaxis()->SetLabelOffset(999);
+  histo2D->GetYaxis()->SetTickLength(0);
+  
+  // Redraw the new axis
+  gPad->Update();
+  TGaxis *newaxis = new TGaxis(gPad->GetUxmin(),
+                               gPad->GetUymax(),
+                               gPad->GetUxmin()-0.001,
+                               gPad->GetUymin(),
+                               histo2D->GetYaxis()->GetXmin(),
+                               histo2D->GetYaxis()->GetXmax(),
+                               510,"+");
+  newaxis->SetLabelOffset(-0.03);
+  newaxis->Draw();
 }

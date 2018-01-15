@@ -86,9 +86,8 @@ int main (int argc, char **argv){
   for (auto file = minNbFiles; file <= NB_FILES; file++){
     std::stringstream inputFile;
     inputFile << INPUT_PATH << FILENAME << file << EXTENSION;
-    std::string strInputFile = inputFile.str();
-    std::cout << strInputFile << std::endl;
-    std::fstream myfile(strInputFile);
+    std::cout << "Processing file: " << inputFile.str() << std::endl;
+    std::fstream myfile(inputFile.str());
     std::vector<std::vector<int>> rawData = chipscopeData.ReadPrnFile(myfile);
     for (auto i = 2; i <= 14; i+=2){
       std::vector<std::vector<int>> rowGroup = chipscopeData.GetChipscopeDisplay(i, rawData);

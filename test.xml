@@ -6,6 +6,7 @@
   <EXTENSION>.prn</EXTENSION>
   <NUMBER_OF_FILES>30</NUMBER_OF_FILES>
   <OUTPUT_ROOT>/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/test.root</OUTPUT_ROOT>
+  <OUTPUT_PNG>/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/result.png</OUTPUT_PNG>
 </FILE>
 
 <ANALYSIS>

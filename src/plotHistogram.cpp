@@ -32,7 +32,7 @@ PlotHistogram::~PlotHistogram(){
   // Destructor
 }
 
-void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle, int rowBinning, int rowMin, int rowMax, int columnBinning, int columnMin, int columnMax, std::vector<std::vector<int>> inputData){
+void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle, std::string fileName, int rowBinning, int rowMin, int rowMax, int columnBinning, int columnMin, int columnMax, std::vector<std::vector<int>> inputData){
   // Plot an hitogramm from a vector of data set
 
   std::unique_ptr<TCanvas> canvas (new TCanvas("canvas", "canvas", 1200, 1100));
@@ -47,7 +47,8 @@ void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle,
   ReverseYAxis(histoToPlot);
   ReverseXAxis(histoToPlot);
   histoToPlot->Write();
-  canvas->SaveAs("/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/result.png");
+  //canvas->SaveAs("/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/result.png");
+  canvas->SaveAs(fileName.c_str());
 }
 
 void PlotHistogram::ReverseXAxis(TH2F *histo2D){

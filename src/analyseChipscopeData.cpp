@@ -61,6 +61,12 @@ int main (int argc, char **argv){
     return 1;
   }
   
+  const std::string OUTPUT_PNG = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_PNG")->GetText();
+  if (OUTPUT_PNG == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
   const std::string DATA_OFFSET_XML = configFileXML.FirstChildElement("ANALYSIS")->FirstChildElement("DATA_OFFSET")->GetText();
   if (DATA_OFFSET_XML == nullptr){
     std::cerr << "Field not found." << std::endl;
@@ -104,7 +110,7 @@ int main (int argc, char **argv){
   
   auto outputRootFile = TFile::Open(OUTPUT_ROOT.c_str(), "RECREATE");
   PlotHistogram coarsePlot;
-  coarsePlot.CreateScatterPlot("Coarse response", "Coarse response", nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, image);
+  coarsePlot.CreateScatterPlot("Coarse response", "Coarse response", OUTPUT_PNG, nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, image);
   outputRootFile->Close();
   
   return 0;

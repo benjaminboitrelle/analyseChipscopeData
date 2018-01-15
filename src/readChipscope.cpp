@@ -39,30 +39,32 @@ ReadChipscope::~ReadChipscope(){
   // DESTRUCTOR
 }
 
-std::vector<std::vector<int>> ReadChipscope::getChipscopeDisplay(int dataToRead, std::vector<std::vector<int>> input){
-  // The different data (SAMPLE or RESET) are 3360 bits long but there is an offset in chipscope 
+std::vector<std::vector<int>> ReadChipscope::GetChipscopeDisplay(int dataToRead, const int dataStart, const int dataLength, std::vector<std::vector<int>> input){
+  // The different data (SAMPLE or RESET) are 3360 bits long but there is an offset in Chipscope 
 
-  int begin = m_dataStart + dataToRead * (m_dataLength); 
-  int end  = begin + m_dataLength;
+  int begin = dataStart + dataToRead * (dataLength);
+  int end  = begin + dataLength;
   std::vector<std::vector<int>> chipscopeDisplay(input.begin() + begin, input.begin() + end);
   return chipscopeDisplay;
 }
 
-std::vector<std::vector<int>> ReadChipscope::getGainBits(std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::GetGainBits(std::vector<std::vector<int>> input, int offset){
   // From a block (Sample or Reset) get the 448 first elements corresponding to the gain
 
-  std::vector<std::vector<int>> gainBits(input.begin() + m_gainBegin, input.begin() + m_gainEnd);   
+  int gainBegin = m_gainBegin + offset;
+  int gainEnd = m_gainEnd + offset;
+  std::vector<std::vector<int>> gainBits(input.begin() + gainBegin, input.begin() + gainEnd);
   return gainBits;  
 }
 
-std::vector<std::vector<int>> ReadChipscope::getGainDecimals(std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::GetGainDecimals(std::vector<std::vector<int>> input){
 
   std::vector<std::vector<int>> gainDecimals;
   for (unsigned int bit = 0; bit < (input.size() / m_numberOfGainBits); bit++){
     std::vector<int> tmpGainDecimals;
     for (unsigned int column = 0; column < input[0].size(); column++){
       std::vector<int> pixelGainBits = {input[bit][column], input[bit + m_rowGroupLength][column]};
-      int pixelGainDecimal = convertBitsToDecimals(pixelGainBits);
+      int pixelGainDecimal = ConvertBitsToDecimals(pixelGainBits);
       tmpGainDecimals.push_back(pixelGainDecimal);
     }  
     gainDecimals.push_back(tmpGainDecimals);
@@ -70,13 +72,13 @@ std::vector<std::vector<int>> ReadChipscope::getGainDecimals(std::vector<std::ve
   return gainDecimals;
 }
 
-std::vector<std::vector<int>> ReadChipscope::getFineBits(std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::GetFineBits(std::vector<std::vector<int>> input){
 
   std::vector<std::vector<int>> fineBits(input.begin() + m_fineBegin, input.begin() + m_fineEnd);
   return fineBits; 
 }
 
-std::vector<std::vector<int>> ReadChipscope::getFineDecimals(std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::GetFineDecimals(std::vector<std::vector<int>> input){
 
   std::vector<std::vector<int>> fineDecimals;
   for (unsigned int bit = 0; bit < (input.size() / m_numberOfFineBits); bit++){
@@ -87,7 +89,7 @@ std::vector<std::vector<int>> ReadChipscope::getFineDecimals(std::vector<std::ve
         pixelFineBits.push_back(input[bit + (numberOfFineBits * m_rowGroupLength)][column]);
       }
       //std::vector<int> pixelFineBits(input[bit][column], input[bit + m_rowGroupLength][column]);
-      int pixelFineDecimal = convertBitsToDecimals(pixelFineBits);
+      int pixelFineDecimal = ConvertBitsToDecimals(pixelFineBits);
       tmpFineDecimals.push_back(pixelFineDecimal);
     }  
     fineDecimals.push_back(tmpFineDecimals);
@@ -95,13 +97,13 @@ std::vector<std::vector<int>> ReadChipscope::getFineDecimals(std::vector<std::ve
   return fineDecimals;
 }
 
-std::vector<std::vector<int>> ReadChipscope::getCoarseBits(std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::GetCoarseBits(std::vector<std::vector<int>> input){
 
   std::vector<std::vector<int>> coarseBits(input.begin() + m_coarseBegin, input.begin() + m_coarseEnd);
   return coarseBits;
 }
 
-std::vector<std::vector<int>> ReadChipscope::getCoarseDecimals(std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::GetCoarseDecimals(std::vector<std::vector<int>> input){
 
   std::vector<std::vector<int>> coarseDecimals;
   for (unsigned int bit = 0; bit < (input.size() / m_numberOfCoarseBits); bit++){
@@ -112,7 +114,7 @@ std::vector<std::vector<int>> ReadChipscope::getCoarseDecimals(std::vector<std::
         pixelCoarseBits.push_back(input[bit + (numberOfCoarseBits * m_rowGroupLength)][column]);
       }
       //std::vector<int> pixelFineBits(input[bit][column], input[bit + m_rowGroupLength][column]);
-      int pixelCoarseDecimal = convertBitsToDecimals(pixelCoarseBits);
+      int pixelCoarseDecimal = ConvertBitsToDecimals(pixelCoarseBits);
       tmpCoarseDecimals.push_back(pixelCoarseDecimal);
     }  
     coarseDecimals.push_back(tmpCoarseDecimals);
@@ -120,7 +122,7 @@ std::vector<std::vector<int>> ReadChipscope::getCoarseDecimals(std::vector<std::
   return coarseDecimals;
 }
 
-int ReadChipscope::convertBitsToDecimals(std::vector<int> inputBits){
+int ReadChipscope::ConvertBitsToDecimals(std::vector<int> inputBits){
 
   int decimal = 0;
   for (unsigned int bit = 0; bit < inputBits.size(); bit++){
@@ -129,7 +131,7 @@ int ReadChipscope::convertBitsToDecimals(std::vector<int> inputBits){
   return decimal;
 }
 
-std::vector<int> ReadChipscope::convertStringToInt(std::vector<std::string>& inputString, std::vector<int>& output){
+std::vector<int> ReadChipscope::ConvertStringToInt(std::vector<std::string>& inputString, std::vector<int>& output){
   // Convert a vector of string into a vector of double
 
   output.resize(inputString.size());
@@ -139,7 +141,7 @@ std::vector<int> ReadChipscope::convertStringToInt(std::vector<std::string>& inp
       });
   return output;
 }
-std::vector<std::vector<int>> ReadChipscope::readPrnFile(std::fstream& myFile){
+std::vector<std::vector<int>> ReadChipscope::ReadPrnFile(std::fstream& myFile){
   // Open a .prn file produced by Chipscope and store its element in a 2D vector of int
 
   std::string outputLine;
@@ -147,10 +149,14 @@ std::vector<std::vector<int>> ReadChipscope::readPrnFile(std::fstream& myFile){
   std::vector<std::vector<int>> outputImageVectorised;
   while (std::getline(myFile, outputLine)){
     std::vector<std::string> result;
-    splitString(outputLine, '\t', result);
-    std::vector<std::string> tmpResult(&result[3], &result[47]); // H0_0 starts at the 3rd position and H1_21 is at the 47 position
+    SplitString(outputLine, '\t', result);
+//    std::vector<std::string> tmpResultH0(&result[3], &result[24]);
+//    std::vector<std::string> tmpResultH1(&result[25], &result[47]);
+//    std::vector<std::string> tmpResult(&result[3], &result[47]); // H0_0 starts at the 3rd position and H1_21 is at the 47 position
+    std::vector<std::string> tmpResult(&result[26], &result[48]);
+    tmpResult.insert(tmpResult.end(),&result[4], &result[25]);
     std::vector<int> resultIntFormat(tmpResult.size());
-    convertStringToInt(tmpResult, resultIntFormat);
+    ConvertStringToInt(tmpResult, resultIntFormat);
     //inverseBits(resultIntFormat);
     for (auto &bit : resultIntFormat) (bit == 0)? bit = 1 : bit = 0;
     outputImageVectorised.push_back(resultIntFormat);
@@ -158,25 +164,8 @@ std::vector<std::vector<int>> ReadChipscope::readPrnFile(std::fstream& myFile){
   m_chipscopeLength = (int)outputImageVectorised.size();
   return outputImageVectorised;
 }
-//void ReadChipscope::readPrnFile(std::fstream& myFile, std::vector<std::vector<int>> &outputImageVectorised){
-//  // Open a .prn file produced by Chipscope and store its element in a 2D vector of int
-//
-//  std::string outputLine;
-//  myFile.ignore ( std::numeric_limits<std::streamsize>::max(), '\n' );
-//  while (std::getline(myFile, outputLine)){
-//    std::vector<std::string> result;
-//    splitString(outputLine, '\t', result);
-//    std::vector<std::string> tmpResult(&result[3], &result[47]); // H0_0 starts at the 3rd position and H1_21 is at the 47 position
-//    std::vector<int> resultIntFormat(tmpResult.size());
-//    convertStringToInt(tmpResult, resultIntFormat);
-//    //inverseBits(resultIntFormat);
-//    for (auto &bit : resultIntFormat) (bit == 0)? bit = 1 : bit = 0;
-//    outputImageVectorised.push_back(resultIntFormat);
-//  }
-//  m_chipscopeLength = (int)outputImageVectorised.size();
-//}
 
-void ReadChipscope::splitString(const std::string& inputString, char delimiterChar, std::vector<std::string> &outputVector){
+void ReadChipscope::SplitString(const std::string& inputString, char delimiterChar, std::vector<std::string> &outputVector){
   // Split a string according to a define delimiter and save it into a vector
 
   std::string::size_type i = 0;
@@ -188,10 +177,9 @@ void ReadChipscope::splitString(const std::string& inputString, char delimiterCh
     j = inputString.find(delimiterChar, j);
     if (j == std::string::npos) outputVector.push_back(inputString.substr(i, inputString.length()));
   }
-
 }
 
-std::vector<std::vector<int>> ReadChipscope::prepareVectorisedImage(std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::PrepareVectorisedImage(std::vector<std::vector<int>> input){
   // Transform the vector of data into a 2D matrix to get the response of a row group 
 
   std::vector<std::vector<int>> outputImage;
@@ -221,11 +209,10 @@ std::vector<std::vector<int>> ReadChipscope::prepareVectorisedImage(std::vector<
     }  
     //std::cout << std::endl;
   }
-
   return outputImage;
 }
 
-void ReadChipscope::inverseBits(std::vector<int> input){
+void ReadChipscope::InverseBits(std::vector<int> input){
   // Translate the english bit convention to the european one
 
     for (auto &bit : input){

@@ -23,13 +23,12 @@
 #include "TStyle.h"
 
 PlotHistogram::PlotHistogram(){
-
+  // Constructor
 }
 
 PlotHistogram::~PlotHistogram(){
-
+  // Destructor
 }
-
 
 void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle, int rowBinning, int rowMin, int rowMax, int columnBinning, int columnMin, int columnMax, std::vector<std::vector<int>> inputData){
   // Plot an hitogramm from a vector of data set
@@ -44,5 +43,5 @@ void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle,
   gStyle->SetPalette(kRainBow);
   histoToPlot->Draw("COLZ");
   histoToPlot->Write();  
-  canvas->SaveAs("result.png");
+  canvas->SaveAs("/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/result.png");
 }

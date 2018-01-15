@@ -19,21 +19,21 @@ class ReadChipscope{
     ReadChipscope();
     ~ReadChipscope();
 
-    std::vector<int> convertStringToInt(std::vector<std::string>& inputString, std::vector<int>& output);
-    std::vector<std::vector<int>> readPrnFile(std::fstream& myFile);
+    std::vector<int> ConvertStringToInt(std::vector<std::string>& inputString, std::vector<int>& output);
+    std::vector<std::vector<int>> ReadPrnFile(std::fstream& myFile);
 
     //void readPrnFile(std::fstream& myFile, std::vector<std::vector<int>> &outputImageVectorised);
-    void inverseBits(std::vector<int> input);
-    void splitString(const std::string &inputString, char delimiterChar, std::vector<std::string> &outputVector);
-    std::vector<std::vector<int>> getChipscopeDisplay(int dataToRead, std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> getGainBits(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> getGainDecimals(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> getFineBits(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> getFineDecimals(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> getCoarseBits(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> getCoarseDecimals(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> prepareVectorisedImage(std::vector<std::vector<int>> input);
-    int convertBitsToDecimals(std::vector<int> inputBits);
+    void InverseBits(std::vector<int> input);
+    void SplitString(const std::string &inputString, char delimiterChar, std::vector<std::string> &outputVector);
+    std::vector<std::vector<int>> GetChipscopeDisplay(int dataToRead, const int dataStart, const int dataLength, std::vector<std::vector<int>> input);
+    std::vector<std::vector<int>> GetGainBits(std::vector<std::vector<int>> input, int offset);
+    std::vector<std::vector<int>> GetGainDecimals(std::vector<std::vector<int>> input);
+    std::vector<std::vector<int>> GetFineBits(std::vector<std::vector<int>> input);
+    std::vector<std::vector<int>> GetFineDecimals(std::vector<std::vector<int>> input);
+    std::vector<std::vector<int>> GetCoarseBits(std::vector<std::vector<int>> input);
+    std::vector<std::vector<int>> GetCoarseDecimals(std::vector<std::vector<int>> input);
+    std::vector<std::vector<int>> PrepareVectorisedImage(std::vector<std::vector<int>> input);
+    int ConvertBitsToDecimals(std::vector<int> inputBits);
 
   private:
     int m_dataLength;

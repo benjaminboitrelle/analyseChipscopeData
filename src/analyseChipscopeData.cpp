@@ -23,83 +23,83 @@
 using namespace tinyxml2;
 
 int main (int argc, char **argv){
-
+  
   XMLDocument configFileXML;
-  XMLError errorResult = configFileXML.LoadFile("test.xml");
+  XMLError errorResult = configFileXML.LoadFile("/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/test.xml");
   if (errorResult != XML_SUCCESS){
     std::cerr << "ERROR! Could not find XML file to read." << std::endl;
     return 1;
   }
   
-  const std::string INPUT_FILE = configFileXML.FirstChildElement("FILE")->FirstChildElement("INPUT")->GetText();
-  if (INPUT_FILE == nullptr){
+  const std::string INPUT_PATH = configFileXML.FirstChildElement("FILE")->FirstChildElement("INPUT")->GetText();
+  if (INPUT_PATH == nullptr){
     std::cerr << "Field not found." << std::endl;
     return 1;
   }
-
+  
+  const std::string FILENAME = configFileXML.FirstChildElement("FILE")->FirstChildElement("FILENAME")->GetText();
+  if (FILENAME == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
+  const std::string EXTENSION = configFileXML.FirstChildElement("FILE")->FirstChildElement("EXTENSION")->GetText();
+  if (EXTENSION == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
+  const std::string NB_FILES = configFileXML.FirstChildElement("FILE")->FirstChildElement("NUMBER_OF_FILES")->GetText();
+  if (NB_FILES == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
   const std::string OUTPUT_ROOT = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_ROOT")->GetText();
   if (OUTPUT_ROOT == nullptr){
     std::cerr << "Field not found." << std::endl;
     return 1;
   }
-
-//  const std::string OUTPUT_PNG = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_PNG")->GetText();
-//  if (OUTPUT_PNG == nullptr){
-//    std::cerr << "Field not found." << std::endl;
-//    return 1;
-//  }
-//
-//  const std::string OUTPUT_ROOT = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_ROOT")->GetText();
-//  if (OUTPUT_ROOT == nullptr){
-//    std::cerr << "Field not found." << std::endl;
-//    return 1;
-//  }
-  std::fstream myfile(INPUT_FILE);
-  //std::vector<std::vector<int>> rawData;
-
-  ReadChipscope chipscopeData;
- // chipscopeData.readPrnFile(myfile, rawData);
-  std::vector<std::vector<int>> rawData = chipscopeData.readPrnFile(myfile);
-
-  //std::cout << "Size of raw Data: number of columns: " << rawData[0].size() << ", number of lines: " << rawData.size() << std::endl;
-
-  //std::vector<std::vector<int>> tmp(&rawData[0], &rawData[3360]);
-  std::vector<std::vector<int>> tmp = chipscopeData.getChipscopeDisplay(2, rawData);
-  std::vector<std::vector<int>> gainBits = chipscopeData.getGainBits(tmp);
-  std::vector<std::vector<int>> fineBits = chipscopeData.getFineBits(tmp);
-  std::vector<std::vector<int>> coarseBits = chipscopeData.getCoarseBits(tmp);
-  std::vector<std::vector<int>> gainDecimals = chipscopeData.getGainDecimals(gainBits);
-  std::vector<std::vector<int>> fineDecimals = chipscopeData.getFineDecimals(fineBits);
-  std::vector<std::vector<int>> coarseDecimals = chipscopeData.getCoarseDecimals(coarseBits);
-  std::cout << "Size of gainBits: " << gainBits.size() << ", size of fineBits: " << fineBits.size() << " and size of coarseBits: " << coarseBits.size() << std::endl;
-  std::cout << "Size of gainDecimals: " << gainDecimals.size() << std::endl;
-  std::cout << "Size of fineDecimals: " << fineDecimals.size() << std::endl;
-  std::cout << "Size of coarseDecimals: " << coarseDecimals.size() << std::endl;
-
-  //for (auto row : coarseBits){
-  //  for (auto column : row){
-  //  std::cout << column << " ";
+  
+  //  const std::string OUTPUT_PNG = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_PNG")->GetText();
+  //  if (OUTPUT_PNG == nullptr){
+  //    std::cerr << "Field not found." << std::endl;
+  //    return 1;
   //  }
-  //  std::cout << std::endl;  
-  //}
-
-  std::vector<std::vector<int>> tmpVec = chipscopeData.prepareVectorisedImage(coarseDecimals);
-  std::cout << "Size of image: " << tmpVec.size() << "; " << tmpVec[0].size() << std::endl;
-
- // for (unsigned int row = 0; row < tmpVec.size(); row++){
- //   for (unsigned int column = 0; column < tmpVec[row].size(); column++){
- //    std::cout << tmpVec[row][column] << " ";  
- //   }
- //   std::cout << std::endl;  
- // }
-
-  //auto outputRootFile = TFile::Open("/home/ben/analyseChipscopeData/output/test.root", "RECREATE");
+  //
+  
+  const int dataOffset = 10084; // 10084
+  const int dataLength = 3360;
+  int nbFiles = stoi(NB_FILES);
+  int minNbFiles = 1;
+  
+  std::vector<std::vector<int>> image;
+  ReadChipscope chipscopeData;
+  
+  for (auto file = minNbFiles; file <= nbFiles; file++){
+    std::stringstream inputFile;
+    inputFile << INPUT_PATH << FILENAME << file << EXTENSION;
+    std::string strInputFile = inputFile.str();
+    std::cout << strInputFile << std::endl;
+    std::fstream myfile(strInputFile);
+    std::vector<std::vector<int>> rawData = chipscopeData.ReadPrnFile(myfile);
+    for (auto i = 2; i <= 14; i+=2){
+      std::vector<std::vector<int>> rowGroup = chipscopeData.GetChipscopeDisplay(i, dataOffset, dataLength, rawData);
+      std::vector<std::vector<int>> coarseBits = chipscopeData.GetCoarseBits(rowGroup);
+      std::vector<std::vector<int>> coarseDecimals = chipscopeData.GetCoarseDecimals(coarseBits);
+      std::vector<std::vector<int>> rowGroupVec = chipscopeData.PrepareVectorisedImage(coarseDecimals);
+      image.insert(image.begin(), rowGroupVec.begin(), rowGroupVec.end());
+    }
+  }
+  
+  int nbOfLines = image.size();
+  int nbOfColumns = image[0].size();
+  std::cout << "Size of image -> number of columns: " << image[0].size() << ", number of lines: " << image.size() << std::endl;
+  
   auto outputRootFile = TFile::Open(OUTPUT_ROOT.c_str(), "RECREATE");
-  PlotHistogram test;
-  test.CreateScatterPlot("Test", "Test", 7, 0, 7, 1408, 0, 1408, tmpVec);
+  PlotHistogram coarsePlot;
+  coarsePlot.CreateScatterPlot("Coarse response", "Coarse response", nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, image);
   outputRootFile->Close();
-
-
-
+  
   return 0;
 }

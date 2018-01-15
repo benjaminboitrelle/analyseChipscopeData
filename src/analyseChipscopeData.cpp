@@ -49,8 +49,8 @@ int main (int argc, char **argv){
     return 1;
   }
   
-  const std::string NB_FILES = configFileXML.FirstChildElement("FILE")->FirstChildElement("NUMBER_OF_FILES")->GetText();
-  if (NB_FILES == nullptr){
+  const std::string NB_FILES_XML = configFileXML.FirstChildElement("FILE")->FirstChildElement("NUMBER_OF_FILES")->GetText();
+  if (NB_FILES_XML == nullptr){
     std::cerr << "Field not found." << std::endl;
     return 1;
   }
@@ -61,22 +61,29 @@ int main (int argc, char **argv){
     return 1;
   }
   
-  //  const std::string OUTPUT_PNG = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_PNG")->GetText();
-  //  if (OUTPUT_PNG == nullptr){
-  //    std::cerr << "Field not found." << std::endl;
-  //    return 1;
-  //  }
-  //
+  const std::string DATA_OFFSET_XML = configFileXML.FirstChildElement("ANALYSIS")->FirstChildElement("DATA_OFFSET")->GetText();
+  if (DATA_OFFSET_XML == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
   
-  const int dataOffset = 10084; // 10084
-  const int dataLength = 3360;
-  int nbFiles = stoi(NB_FILES);
+  const std::string DATA_LENGTH_XML = configFileXML.FirstChildElement("ANALYSIS")->FirstChildElement("DATA_LENGTH")->GetText();
+  if (DATA_LENGTH_XML == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
+  const int DATA_OFFSET = stoi(DATA_OFFSET_XML);
+  const int DATA_LENGTH = stoi(DATA_LENGTH_XML);
+  const int NB_FILES = stoi(NB_FILES_XML);
   int minNbFiles = 1;
   
   std::vector<std::vector<int>> image;
   ReadChipscope chipscopeData;
+  chipscopeData.SetDataStart(DATA_OFFSET);
+  chipscopeData.SetDataLength(DATA_LENGTH);
   
-  for (auto file = minNbFiles; file <= nbFiles; file++){
+  for (auto file = minNbFiles; file <= NB_FILES; file++){
     std::stringstream inputFile;
     inputFile << INPUT_PATH << FILENAME << file << EXTENSION;
     std::string strInputFile = inputFile.str();
@@ -84,7 +91,7 @@ int main (int argc, char **argv){
     std::fstream myfile(strInputFile);
     std::vector<std::vector<int>> rawData = chipscopeData.ReadPrnFile(myfile);
     for (auto i = 2; i <= 14; i+=2){
-      std::vector<std::vector<int>> rowGroup = chipscopeData.GetChipscopeDisplay(i, dataOffset, dataLength, rawData);
+      std::vector<std::vector<int>> rowGroup = chipscopeData.GetChipscopeDisplay(i, rawData);
       std::vector<std::vector<int>> coarseBits = chipscopeData.GetCoarseBits(rowGroup);
       std::vector<std::vector<int>> coarseDecimals = chipscopeData.GetCoarseDecimals(coarseBits);
       std::vector<std::vector<int>> rowGroupVec = chipscopeData.PrepareVectorisedImage(coarseDecimals);

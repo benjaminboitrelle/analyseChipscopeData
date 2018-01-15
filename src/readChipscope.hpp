@@ -25,7 +25,7 @@ class ReadChipscope{
     //void readPrnFile(std::fstream& myFile, std::vector<std::vector<int>> &outputImageVectorised);
     void InverseBits(std::vector<int> input);
     void SplitString(const std::string &inputString, char delimiterChar, std::vector<std::string> &outputVector);
-    std::vector<std::vector<int>> GetChipscopeDisplay(int dataToRead, const int dataStart, const int dataLength, std::vector<std::vector<int>> input);
+    std::vector<std::vector<int>> GetChipscopeDisplay(int dataToRead, std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> GetGainBits(std::vector<std::vector<int>> input, int offset);
     std::vector<std::vector<int>> GetGainDecimals(std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> GetFineBits(std::vector<std::vector<int>> input);
@@ -34,6 +34,10 @@ class ReadChipscope{
     std::vector<std::vector<int>> GetCoarseDecimals(std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> PrepareVectorisedImage(std::vector<std::vector<int>> input);
     int ConvertBitsToDecimals(std::vector<int> inputBits);
+  
+  void SetDataLength(int dataLength);
+  void SetDataStart(int dataStart);
+
 
   private:
     int m_dataLength;

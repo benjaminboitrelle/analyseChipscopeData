@@ -18,7 +18,7 @@
 #include <utility>
 #include <math.h>
 
-#include "TH2F.h"
+#include "TH2I.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TAxis.h"
@@ -35,23 +35,28 @@ PlotHistogram::~PlotHistogram(){
 void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle, std::string fileName, int rowBinning, int rowMin, int rowMax, int columnBinning, int columnMin, int columnMax, std::vector<std::vector<int>> inputData){
   // Plot an hitogramm from a vector of data set
 
-  std::unique_ptr<TCanvas> canvas (new TCanvas("canvas", "canvas", 1200, 1100));
-  auto histoToPlot = new TH2F(title.c_str(), histoTitle.c_str(), columnBinning, columnMin, columnMax, rowBinning, rowMin, rowMax);
-  for (unsigned int row = 0; row < inputData.size(); row++){
-    for (unsigned int column = 0; column < inputData[row].size(); column++){
+  std::unique_ptr<TCanvas> canvas (new TCanvas("canvas", "canvas", 800, 800));
+  TH2I *histoToPlot = new TH2I(title.c_str(), histoTitle.c_str(), columnBinning, columnMin, columnMax, rowBinning, rowMin, rowMax);
+  for (unsigned int row = rowMin; row < rowMax; row++){
+    for (unsigned int column = columnMin; column < columnMax; column++){
+//      for (unsigned int row = 0; row < inputData.size(); row++){
+//        for (unsigned int column = 0; column < inputData[row].size(); column++){
+
       histoToPlot->Fill(column, row, inputData[row][column]);
+      //histoToPlot->SetBinContent(column, row, inputData[row][column]);
     }
   }
+  gStyle->SetOptStat(kFALSE);
   gStyle->SetPalette(kRainBow);
   histoToPlot->Draw("COLZ");
   ReverseYAxis(histoToPlot);
   ReverseXAxis(histoToPlot);
   histoToPlot->Write();
-  //canvas->SaveAs("/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/result.png");
+  canvas->Update();
   canvas->SaveAs(fileName.c_str());
 }
 
-void PlotHistogram::ReverseXAxis(TH2F *histo2D){
+void PlotHistogram::ReverseXAxis(TH2I *histo2D){
   // Remove the current axis
   histo2D->GetXaxis()->SetLabelOffset(999);
   histo2D->GetXaxis()->SetTickLength(0);
@@ -70,7 +75,7 @@ void PlotHistogram::ReverseXAxis(TH2F *histo2D){
   newaxis->Draw();
 }
 
-void PlotHistogram:: ReverseYAxis(TH2F *histo2D){
+void PlotHistogram:: ReverseYAxis(TH2I *histo2D){
   // Remove the current axis
   histo2D->GetYaxis()->SetLabelOffset(999);
   histo2D->GetYaxis()->SetTickLength(0);

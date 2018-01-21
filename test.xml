@@ -4,12 +4,11 @@
   <INPUT>/Users/ben/PostDoc/006_horseman_OD10_20171207/allSensor/</INPUT>
   <FILENAME>horseman</FILENAME>
   <EXTENSION>.prn</EXTENSION>
-  <NUMBER_OF_FILES>30</NUMBER_OF_FILES>
+<NUMBER_OF_FILES>30</NUMBER_OF_FILES>
   <OUTPUT_ROOT>/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/test.root</OUTPUT_ROOT>
   <OUTPUT_PNG>/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/result.png</OUTPUT_PNG>
 </FILE>
-
 <ANALYSIS>
-  <DATA_OFFSET>10084</DATA_OFFSET>
+  <DATA_OFFSET>10083</DATA_OFFSET>
   <DATA_LENGTH>3360</DATA_LENGTH>
 </ANALYSIS>

@@ -26,7 +26,7 @@ class ReadChipscope{
     void InverseBits(std::vector<int> input);
     void SplitString(const std::string &inputString, char delimiterChar, std::vector<std::string> &outputVector);
     std::vector<std::vector<int>> GetChipscopeDisplay(int dataToRead, std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> GetGainBits(std::vector<std::vector<int>> input, int offset);
+    std::vector<std::vector<int>> GetGainBits(std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> GetGainDecimals(std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> GetFineBits(std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> GetFineDecimals(std::vector<std::vector<int>> input);

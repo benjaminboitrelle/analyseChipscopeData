@@ -21,8 +21,8 @@ class PlotHistogram{
     ~PlotHistogram();
 
   void CreateScatterPlot(std::string title, std::string histoTitle, std::string fileName, int rowBinning, int rowMin, int rowMax, int columnBinning, int columnMin, int columnMax, std::vector<std::vector<int>> inputData);
-  void ReverseXAxis(TH2F *histo2D);
-  void ReverseYAxis(TH2F *histo2D);
+  void ReverseXAxis(TH2I *histo2D);
+  void ReverseYAxis(TH2I *histo2D);
 
   private:
 };

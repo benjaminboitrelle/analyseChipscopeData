@@ -41,14 +41,80 @@ ReadChipscope::~ReadChipscope(){
   // DESTRUCTOR
 }
 
+std::vector<std::vector<int>> ReadChipscope::BitReordering(std::vector<std::vector<int>> input){
+ /* Bits are reorganised according to the output given by P2M manual
+  * Please notice that pixels output are ordered as follow:
+  *
+  * | 24 | 16 | 8  | 0 |
+  * | 25 | 17 | 9  | 1 |
+  * | 26 | 18 | 10 | 2 |
+  * | 27 | 19 | 11 | 3 |   For row going from 6 to 0
+  * | 28 | 20 | 12 | 4 |
+  * | 29 | 21 | 13 | 5 |
+  * | 30 | 22 | 14 | 6 |
+  * | 31 | 23 | 15 | 7 |
+  */
+  
+  std::vector<std::vector<int>> inputRemapped;
+  inputRemapped.resize(input.size());
+  for (unsigned int bit = 0; bit < input.size(); bit++){
+    inputRemapped[bit].resize(input[bit].size());
+  }
+  
+  int dataShift = 28;
+  for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
+    std::cout << "Data line: " << dataLine << std::endl;
+    int blockShift = 1;
+    int blockCounter = 0;
+    int tmpRow = 7;
+    int offset = 0;
+    int endOfColumn = 0;
+    int bitGroup = m_rowGroupLength;
+    int groupRead = 0;
+    for (unsigned int bit = 0; bit < input.size(); bit++){
+      if (bit % 224 == 0 && bit > 0){
+        groupRead++;
+//        std::cout << "groupRead * bitGroup = " << groupRead * bitGroup <<  std::endl;
+        tmpRow = 7;
+        blockCounter = 0;
+        endOfColumn = 0;
+        offset = 0;
+        blockShift = 2;
+      }
+      if (blockCounter == 3){
+        blockShift = 0;
+      }
+
+//      std::cout << "Bit = " << bit << " and groupRead * bitGroup + offset + tmpRow * dataShift + encule = " << groupRead * bitGroup + offset + tmpRow * dataShift + blockShift <<  std::endl;
+      inputRemapped[bit][dataLine] = input[groupRead * bitGroup + offset + tmpRow * dataShift + blockShift][dataLine];
+      tmpRow--;
+      if (tmpRow < 0){
+        tmpRow = 7;
+        blockCounter++;
+        blockShift++;
+//        std::cout << "---" << std::endl;
+      }
+      if (blockCounter > 3){
+        endOfColumn++;
+        blockCounter = 0;
+        blockShift = 1;
+        offset = 4 * endOfColumn;
+        tmpRow = 7;
+//        std::cout << "-----" << std::endl;
+      }
+    }
+  }
+  return inputRemapped;
+}
+
 std::vector<std::vector<int>> ReadChipscope::GetChipscopeDisplay(int dataToRead, std::vector<std::vector<int>> input){
   // The different data (SAMPLE or RESET) are 3360 bits long but there is an offset in Chipscope
   
   int begin = m_dataStart + dataToRead * (m_dataLength);
   int end  = begin + m_dataLength;
   std::vector<std::vector<int>> chipscopeDisplay(input.begin() + begin, input.begin() + end);
-  //  std::cout << "Size of vector (data): " << chipscopeDisplay.size() << std::endl;
-  return chipscopeDisplay;
+  //  return chipscopeDisplay;
+  return BitReordering(chipscopeDisplay);
 }
 
 std::vector<std::vector<int>> ReadChipscope::GetGainBits(std::vector<std::vector<int>> input){
@@ -106,29 +172,53 @@ std::vector<std::vector<int>> ReadChipscope::GetFineDecimals(std::vector<std::ve
 
 std::vector<std::vector<int>> ReadChipscope::GetCoarseBits(std::vector<std::vector<int>> input){
   
-  //  std::cout << "Size of input for coarse (bits) " << input.size() << " " << input[0].size() << std::endl;
+  //  std::cout << "Size of input for coarse (bits)" << input.size() << " " << input[0].size() << std::endl;
   std::vector<std::vector<int>> coarseBits(input.begin() + m_coarseBegin, input.begin() + m_coarseEnd);
-  //  std::cout << "Size of Coarse (bits): " << coarseBits.size() << " " << coarseBits[0].size() << std::endl;
   return coarseBits;
 }
 
 std::vector<std::vector<int>> ReadChipscope::GetCoarseDecimals(std::vector<std::vector<int>> input){
   
   std::vector<std::vector<int>> coarseDecimals;
-  for (unsigned int bit = 0; bit < (input.size() / m_numberOfCoarseBits); bit++){
-    std::vector<int> tmpCoarseDecimals;
-    for (unsigned int column = 0; column < input[0].size(); column++){
-      std::vector<int> pixelCoarseBits;
-      for (auto numberOfCoarseBits = 0; numberOfCoarseBits < m_numberOfCoarseBits; numberOfCoarseBits++){
-        pixelCoarseBits.push_back(input[bit + (numberOfCoarseBits * m_rowGroupLength)][column]);
-      }
-      //std::vector<int> pixelFineBits(input[bit][column], input[bit + m_rowGroupLength][column]);
-      int pixelCoarseDecimal = ConvertBitsToDecimals(pixelCoarseBits);
-      tmpCoarseDecimals.push_back(pixelCoarseDecimal);
-    }
-    coarseDecimals.push_back(tmpCoarseDecimals);
+  coarseDecimals.resize(m_rowGroupLength);
+  for (unsigned int bit = 0; bit < coarseDecimals.size(); bit++){
+    coarseDecimals[bit].resize(input[bit].size());
   }
-  //  std::cout << "Size of Coarse (decimals): " << coarseDecimals[0].size() << std::endl;
+  
+  for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
+    //    std::cout << "Data line: " << dataLine << std::endl;
+    int offset = m_rowGroupLength;
+    int adcBit = 0;
+    int counter = 0;
+    int bibite = 0;
+    int pixelCoarseDecimal = 0;
+    std::vector<int> pixelCoarseBits;
+    for (unsigned int bit = 0; bit < input.size(); bit++){
+      adcBit++;
+      pixelCoarseBits.push_back(input[bibite * offset + counter][dataLine]);
+      if (adcBit % 5 == 0 && adcBit > 0 ){
+        //        std::cout << " Size of pixel Bits: " << pixelCoarseBits.size() << std::endl;
+        adcBit = 0;
+        pixelCoarseDecimal = ConvertBitsToDecimals(pixelCoarseBits);
+        //        std::cout << " (bit, dataLine) = decimal: (" << counter << ", " << dataLine << ") = " << pixelCoarseDecimal << std::endl;
+        //        std::cout << "(counter, dataLine): (" << counter << ", " << dataLine << ")" << std::endl;
+        coarseDecimals[counter][dataLine] = pixelCoarseDecimal;
+        counter++;
+        bibite = -1;
+        
+        pixelCoarseBits.clear();
+      }
+      bibite++;
+    }
+    //    std::cout << "Size of pixel Decimal: " << pixelDecimal.size() << std::endl;
+    //    coarseDecimals.push_back(pixelDecimal);
+  }
+  //  for (unsigned int dataLine = 0; dataLine < coarseDecimals[0].size(); dataLine++){
+  //    for (unsigned int bit = 0; bit < coarseDecimals.size(); bit++){
+  //      std::cout << "Bite: " << coarseDecimals[bit][dataLine] << std::endl;
+  //    }
+  //  }
+  
   return coarseDecimals;
 }
 
@@ -198,71 +288,33 @@ std::vector<std::vector<int>> ReadChipscope::PrepareVectorisedImage(std::vector<
     outputImage[i].resize(nbOfColumns);
   }
   int nbOfColumnsPerDataLine  = 31;
-  //  int tmpCol = nbOfColumnsPerDataLine + 1;
-  //  int columnDecrement = 0;
+
   
-  for (unsigned int column = 0; column < input[0].size(); column++){
-//    int i = 0;
+  for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
+    //    std::cout << "Data Line: " << dataLxine << std::endl;
     int tmpRow = -1;
-    int columnPositionInDataLine = nbOfColumnsPerDataLine;
-//    std::cout << "Re-initialisation of column positionning " << columnPositionInDataLine << std::endl;
-    int tmpCol =  column + columnPositionInDataLine * column;
+    //    std::cout << "Re-initialisation of column positionning " << columnPositionInDataLine << std::endl;
+    //    int tmpCol =  dataLine * nbOfColumnsPerDataLine + 23;
+    int tmpCol =  dataLine * nbOfColumnsPerDataLine;
+    
+    
     //      tmpCol =  nbOfColumnsPerDataLine + (nbOfColumnsPerDataLine  * column) - i;
     //    tmpCol = nbOfColumnsPerDataLine + columnPositionInDataLine * column;
     //    std::cout << "tmpCol in 1st loop: " << tmpCol <<  std::endl;
     
-    for (unsigned int row = 0; row < input.size(); row++){
-//      std::cout << "Reorganisation of row and column..." << std::endl;
-      if (row % 32 == 0){
+    for (unsigned int bit = 0; bit < input.size(); bit++){
+      //      std::cout << "Reorganisation of row and column..." << std::endl;
+      if (bit % 32 == 0){
         tmpRow++;
-        
-        //                tmpCol = column + nbOfColumnsPerDataLine * column;
-        //        tmpCol = nbOfColumnsPerDataLine + columnPositionInDataLine * column;
+        tmpCol = dataLine * nbOfColumnsPerDataLine;
 
-//        tmpCol = nbOfColumnsPerDataLine + nbOfColumnsPerDataLine * column;
-//        if (columnPositionInDataLine < 0){
-//          i++;
-//          if (i > 7){
-//            i = 0;
-//          }
-//          //          std::cout << "i: " << i << std::endl;
-//          columnPositionInDataLine = nbOfColumnsPerDataLine - i;
-          //          std::cout << "If pointed column is negative, reinitilisation: " << columnPositionInDataLine << std::endl;
-//        }
-        tmpCol = nbOfColumnsPerDataLine + columnPositionInDataLine * column;
-
-        outputImage[tmpRow][tmpCol] = input[row][column];
-        //        std::cout << "tmpCol in 2st loop: " << tmpCol <<  std::endl;
-        
+        //        std::cout << "row, col: " << tmpRow << ", " << tmpCol << " bit: " << bit << std::endl;
       }
-      else{
-        outputImage[tmpRow][tmpCol] = input[row][column];
-//        columnPositionInDataLine -= 8;
-//        std::cout << "Deincrementation of pointed column: " << columnPositionInDataLine << std::endl;
-//        tmpCol = nbOfColumnsPerDataLine + columnPositionInDataLine * column;
-//        if (columnPositionInDataLine < 0){
-//          i++;
-//          if (i > 7){
-//            i = 0;
-//          }
-////          std::cout << "i: " << i << std::endl;
-//          columnPositionInDataLine = nbOfColumnsPerDataLine - i;
-//          std::cout << "If pointed column is negative, reinitilisation: " << columnPositionInDataLine << std::endl;
-//        }
-//        tmpCol = nbOfColumnsPerDataLine + columnPositionInDataLine * column;
-//        tmpCol = columnPositionInDataLine;
-
-        //        std::cout << " Temporary column ordering " << tmpCol << std::endl;
-//                tmpCol++;
-        //        columnPositionInDataLine -= 4;
-        //        tmpCol = nbOfColumnsPerDataLine + columnPositionInDataLine * column;
-        
-        tmpCol--;
-      }
+      outputImage[tmpRow][tmpCol] = input[bit][dataLine];
+      //        std::cout << "row, col: " << tmpRow << ", " << tmpCol << " bit: " << bit << std::endl;
+      tmpCol++;
     }
   }
-  
-  //  std::cout << "NUMBER OF COLUMNS CREATED: " << colCounter << std::endl;
   return outputImage;
 }
 

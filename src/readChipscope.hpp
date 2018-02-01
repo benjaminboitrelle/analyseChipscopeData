@@ -25,6 +25,7 @@ class ReadChipscope{
     //void readPrnFile(std::fstream& myFile, std::vector<std::vector<int>> &outputImageVectorised);
     void InverseBits(std::vector<int> input);
     void SplitString(const std::string &inputString, char delimiterChar, std::vector<std::string> &outputVector);
+    std::vector<std::vector<int>> BitReordering(std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> GetChipscopeDisplay(int dataToRead, std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> GetGainBits(std::vector<std::vector<int>> input);
     std::vector<std::vector<int>> GetGainDecimals(std::vector<std::vector<int>> input);

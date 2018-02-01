@@ -92,7 +92,7 @@ int main (int argc, char **argv){
   for (auto file = minNbFiles; file <= NB_FILES; file++){
     std::stringstream inputFile;
     inputFile << INPUT_PATH << FILENAME << file << EXTENSION;
-    //    std::cout << "Processing file: " << inputFile.str() << std::endl;
+//        std::cout << "Processing file: " << inputFile.str() << std::endl;
     std::fstream myfile(inputFile.str());
     std::vector<std::vector<int>> rawData = chipscopeData.ReadPrnFile(myfile);
     for (auto groupNumber = 2; groupNumber <= 14; groupNumber += 2){
@@ -118,28 +118,28 @@ int main (int argc, char **argv){
   //    std::cout << std::endl;
   //  }
   //
-  int spy = 0;
-  for (auto row = 0; row < imageCoarse.size(); row++){
-    //    std::cout << "Swaping position..." << std::endl;
-    auto newColPosition = imageCoarse[row].size() - 1;
-    while (newColPosition > 8){
-//      std::cout << "Swaping col " << newColPosition << " with " << newColPosition - 8 << std::endl;
-      std::swap(imageCoarse[row][newColPosition], imageCoarse[row][newColPosition - 8]);
-      std::cout << "Col position: " << newColPosition << std::endl;
-      spy++;
-      if (3 == 0){
-        newColPosition  += 23;
-        std::cout << "If Col position: " << newColPosition << std::endl;
-      }
-      else{
-        newColPosition -= 8;
-        std::cout << "Col position -- : " << newColPosition << std::endl;
-      }
-    }
-  }
+//  int spy = 0;
+//  for (auto row = 0; row < imageCoarse.size(); row++){
+//    //    std::cout << "Swaping position..." << std::endl;
+//    auto newColPosition = imageCoarse[row].size() - 1;
+//    while (newColPosition > 8){
+////      std::cout << "Swaping col " << newColPosition << " with " << newColPosition - 8 << std::endl;
+//      std::swap(imageCoarse[row][newColPosition], imageCoarse[row][newColPosition - 8]);
+//      std::cout << "Col position: " << newColPosition << std::endl;
+//      spy++;
+//      if (3 == 0){
+//        newColPosition  += 23;
+//        std::cout << "If Col position: " << newColPosition << std::endl;
+//      }
+//      else{
+//        newColPosition -= 8;
+//        std::cout << "Col position -- : " << newColPosition << std::endl;
+//      }
+//    }
+//  }
   int nbOfLines = imageCoarse.size();
   int nbOfColumns = imageCoarse[0].size();
-  //  std::cout << "Size of image -> number of columns: " << imageCoarse[0].size() << ", number of lines: " << imageCoarse.size() << std::endl;
+//    std::cout << "Size of image -> number of columns: " << imageCoarse[0].size() << ", number of lines: " << imageCoarse.size() << std::endl;
   
   auto outputRootFile = TFile::Open(OUTPUT_ROOT.c_str(), "RECREATE");
   PlotHistogram gainPlot, coarsePlot, finePlot;

@@ -14,27 +14,25 @@
 
 
 class ReadChipscope{
-
-  public:
-    ReadChipscope();
-    ~ReadChipscope();
-
-    std::vector<int> ConvertStringToInt(std::vector<std::string>& inputString, std::vector<int>& output);
-    std::vector<std::vector<int>> ReadPrnFile(std::fstream& myFile);
-
-    //void readPrnFile(std::fstream& myFile, std::vector<std::vector<int>> &outputImageVectorised);
-    void InverseBits(std::vector<int> input);
-    void SplitString(const std::string &inputString, char delimiterChar, std::vector<std::string> &outputVector);
-    std::vector<std::vector<int>> BitReordering(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> GetChipscopeDisplay(int dataToRead, std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> GetGainBits(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> GetGainDecimals(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> GetFineBits(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> GetFineDecimals(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> GetCoarseBits(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> GetCoarseDecimals(std::vector<std::vector<int>> input);
-    std::vector<std::vector<int>> PrepareVectorisedImage(std::vector<std::vector<int>> input);
-    int ConvertBitsToDecimals(std::vector<int> inputBits);
+  
+public:
+  ReadChipscope();
+  ~ReadChipscope();
+  
+  std::vector<int> ConvertStringToInt(std::vector<std::string>& inputString, std::vector<int>& output);
+  std::vector<std::vector<int>> ReadPrnFile(std::fstream& myFile);
+  
+  //void readPrnFile(std::fstream& myFile, std::vector<std::vector<int>> &outputImageVectorised);
+  void InverseBits(std::vector<int> input);
+  void SplitString(const std::string &inputString, char delimiterChar, std::vector<std::string> &outputVector);
+  std::vector<std::vector<int>> BitReordering(std::vector<std::vector<int>> input);
+  std::vector<std::vector<int>> GetChipscopeDisplay(int dataToRead, std::vector<std::vector<int>> input);
+  std::vector<std::vector<int>> GetGainBits(std::vector<std::vector<int>> input);
+  std::vector<std::vector<int>> GetFineBits(std::vector<std::vector<int>> input);
+  std::vector<std::vector<int>> GetCoarseBits(std::vector<std::vector<int>> input);
+  std::vector<std::vector<int>> GetDecimalOutput(std::vector<std::vector<int>> input, int numberOfBits);
+  std::vector<std::vector<int>> PrepareVectorisedImage(std::vector<std::vector<int>> input);
+  int ConvertBitsToDecimals(std::vector<int> inputBits);
   
   std::vector<std::vector<int>> Resize2DVector(int nbOfLines, int nbOfColumns);
   
@@ -42,22 +40,24 @@ class ReadChipscope{
   void SetDataStart(int dataStart);
   void SetNumberPixels(int numberOfPixels);
   void SetNumberGainBits(int numberOfGainBits);
-
-  private:
-    int m_dataLength;
-    int m_dataStart;
-    int m_chipscopeLength;
-    int m_numberOfGainBits;
-    int m_numberOfFineBits;
-    int m_numberOfCoarseBits;
-    int m_rowGroupLength;
-    int m_gainBegin;
-    int m_gainEnd;
-    int m_fineBegin;
-    int m_fineEnd;
-    int m_coarseBegin;
-    int m_coarseEnd;
-    int m_numberOfColumnsPerDataLine;
-
+  void SetNumberFineBits(int numberOfFineBits);
+  void SetNumberCoarseBits(int numberOfCoarseBits);
+  
+private:
+  int m_dataLength;
+  int m_dataStart;
+  int m_chipscopeLength;
+  int m_numberOfGainBits;
+  int m_numberOfFineBits;
+  int m_numberOfCoarseBits;
+  int m_rowGroupLength;
+  int m_gainBegin;
+  int m_gainEnd;
+  int m_fineBegin;
+  int m_fineEnd;
+  int m_coarseBegin;
+  int m_coarseEnd;
+  int m_numberOfColumnsPerDataLine;
+  
 };
 #endif /* readChipscope_hpp */

@@ -79,30 +79,56 @@ int main (int argc, char **argv){
     return 1;
   }
   
+  const std::string GAIN_SIZE_XML = configFileXML.FirstChildElement("ANALYSIS")->FirstChildElement("GAIN_SIZE")->GetText();
+  if (GAIN_SIZE_XML == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
+  const std::string FINE_SIZE_XML = configFileXML.FirstChildElement("ANALYSIS")->FirstChildElement("FINE_SIZE")->GetText();
+  if (FINE_SIZE_XML == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
+  const std::string COARSE_SIZE_XML = configFileXML.FirstChildElement("ANALYSIS")->FirstChildElement("COARSE_SIZE")->GetText();
+  if (COARSE_SIZE_XML == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
   const int DATA_OFFSET = stoi(DATA_OFFSET_XML);
   const int DATA_LENGTH = stoi(DATA_LENGTH_XML);
   const int NB_FILES = stoi(NB_FILES_XML);
+  const int GAIN_SIZE = stoi(GAIN_SIZE_XML);
+  const int FINE_SIZE = stoi(FINE_SIZE_XML);
+  const int COARSE_SIZE = stoi(COARSE_SIZE_XML);
+  
   int minNbFiles = 1;
   
   std::vector<std::vector<int>> imageCoarse, imageGain, imageFine;
   ReadChipscope chipscopeData;
   chipscopeData.SetDataStart(DATA_OFFSET);
   chipscopeData.SetDataLength(DATA_LENGTH);
+  chipscopeData.SetNumberGainBits(GAIN_SIZE);
+  chipscopeData.SetNumberFineBits(FINE_SIZE);
+  chipscopeData.SetNumberCoarseBits(COARSE_SIZE);
   
   for (auto file = minNbFiles; file <= NB_FILES; file++){
     std::stringstream inputFile;
     inputFile << INPUT_PATH << FILENAME << file << EXTENSION;
-//        std::cout << "Processing file: " << inputFile.str() << std::endl;
+    //        std::cout << "Processing file: " << inputFile.str() << std::endl;
     std::fstream myfile(inputFile.str());
     std::vector<std::vector<int>> rawData = chipscopeData.ReadPrnFile(myfile);
     for (auto groupNumber = 2; groupNumber <= 14; groupNumber += 2){
       std::vector<std::vector<int>> rowGroup = chipscopeData.GetChipscopeDisplay(groupNumber, rawData);
       std::vector<std::vector<int>> gainBits = chipscopeData.GetGainBits(rowGroup);
-      std::vector<std::vector<int>> gainDecimals = chipscopeData.GetGainDecimals(gainBits);
+      std::vector<std::vector<int>> gainDecimals = chipscopeData.GetDecimalOutput(gainBits, GAIN_SIZE);
       std::vector<std::vector<int>> fineBits = chipscopeData.GetFineBits(rowGroup);
-      std::vector<std::vector<int>> fineDecimals = chipscopeData.GetFineDecimals(fineBits);
+      std::vector<std::vector<int>> fineDecimals = chipscopeData.GetDecimalOutput(fineBits, FINE_SIZE);
       std::vector<std::vector<int>> coarseBits = chipscopeData.GetCoarseBits(rowGroup);
-      std::vector<std::vector<int>> coarseDecimals = chipscopeData.GetCoarseDecimals(coarseBits);
+      std::vector<std::vector<int>> coarseDecimals = chipscopeData.GetDecimalOutput(coarseBits, COARSE_SIZE);
+      
       std::vector<std::vector<int>> rowGroupVecGain = chipscopeData.PrepareVectorisedImage(gainDecimals);
       std::vector<std::vector<int>> rowGroupVecFine = chipscopeData.PrepareVectorisedImage(fineDecimals);
       std::vector<std::vector<int>> rowGroupVecCoarse = chipscopeData.PrepareVectorisedImage(coarseDecimals);
@@ -118,28 +144,10 @@ int main (int argc, char **argv){
   //    std::cout << std::endl;
   //  }
   //
-//  int spy = 0;
-//  for (auto row = 0; row < imageCoarse.size(); row++){
-//    //    std::cout << "Swaping position..." << std::endl;
-//    auto newColPosition = imageCoarse[row].size() - 1;
-//    while (newColPosition > 8){
-////      std::cout << "Swaping col " << newColPosition << " with " << newColPosition - 8 << std::endl;
-//      std::swap(imageCoarse[row][newColPosition], imageCoarse[row][newColPosition - 8]);
-//      std::cout << "Col position: " << newColPosition << std::endl;
-//      spy++;
-//      if (3 == 0){
-//        newColPosition  += 23;
-//        std::cout << "If Col position: " << newColPosition << std::endl;
-//      }
-//      else{
-//        newColPosition -= 8;
-//        std::cout << "Col position -- : " << newColPosition << std::endl;
-//      }
-//    }
-//  }
+  
   int nbOfLines = imageCoarse.size();
   int nbOfColumns = imageCoarse[0].size();
-//    std::cout << "Size of image -> number of columns: " << imageCoarse[0].size() << ", number of lines: " << imageCoarse.size() << std::endl;
+  //    std::cout << "Size of image -> number of columns: " << imageCoarse[0].size() << ", number of lines: " << imageCoarse.size() << std::endl;
   
   auto outputRootFile = TFile::Open(OUTPUT_ROOT.c_str(), "RECREATE");
   PlotHistogram gainPlot, coarsePlot, finePlot;

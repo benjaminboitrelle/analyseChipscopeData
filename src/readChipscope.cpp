@@ -57,16 +57,15 @@ std::vector<std::vector<int>> ReadChipscope::BitReordering(std::vector<std::vect
    */
   
   std::vector<std::vector<int>> inputRemapped = Resize2DVector(input.size(), input[0].size());
-
+  
   int dataShift = 28;
   for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
-//    std::cout << "Data line: " << dataLine << std::endl;
+    //    std::cout << "Data line: " << dataLine << std::endl;
     int blockShift = 1;
     int blockCounter = 0;
     int tmpRow = 7;
     int offset = 0;
     int endOfColumn = 0;
-    int bitGroup = m_rowGroupLength;
     int groupRead = 0;
     for (unsigned int bit = 0; bit < input.size(); bit++){
       if (bit % m_rowGroupLength == 0 && bit > 0){
@@ -83,7 +82,7 @@ std::vector<std::vector<int>> ReadChipscope::BitReordering(std::vector<std::vect
       }
       
       //      std::cout << "Bit = " << bit << " and groupRead * bitGroup + offset + tmpRow * dataShift + encule = " << groupRead * bitGroup + offset + tmpRow * dataShift + blockShift <<  std::endl;
-      inputRemapped[bit][dataLine] = input[groupRead * bitGroup + offset + tmpRow * dataShift + blockShift][dataLine];
+      inputRemapped[bit][dataLine] = input[groupRead * m_rowGroupLength + offset + tmpRow * dataShift + blockShift][dataLine];
       tmpRow--;
       if (tmpRow < 0){
         tmpRow = 7;
@@ -122,67 +121,11 @@ std::vector<std::vector<int>> ReadChipscope::GetGainBits(std::vector<std::vector
   return gainBits;
 }
 
-std::vector<std::vector<int>> ReadChipscope::GetGainDecimals(std::vector<std::vector<int>> input){
-  
-  std::vector<std::vector<int>> gainDecimals = Resize2DVector(m_rowGroupLength, input[0].size());
-
-  for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
-    int offset = m_rowGroupLength;
-    int adcBit = 0;
-    int counter = 0;
-    int bibite = 0;
-    int pixelGainDecimal = 0;
-    std::vector<int> pixelGainBits;
-    for (unsigned int bit = 0; bit < input.size(); bit++){
-      adcBit++;
-      pixelGainBits.push_back(input[bibite * offset + counter][dataLine]);
-      if (adcBit % m_numberOfGainBits == 0 && adcBit > 0 ){
-        adcBit = 0;
-        pixelGainDecimal = ConvertBitsToDecimals(pixelGainBits);
-        gainDecimals[counter][dataLine] = pixelGainDecimal;
-        counter++;
-        bibite = -1;
-        pixelGainBits.clear();
-      }
-      bibite++;
-    }
-  }
-  return gainDecimals;
-}
-
 std::vector<std::vector<int>> ReadChipscope::GetFineBits(std::vector<std::vector<int>> input){
   // From a block (Sample or Reset) get the 1792 elements corresponding to the fine
   
   std::vector<std::vector<int>> fineBits(input.begin() + m_fineBegin, input.begin() + m_fineEnd);
   return fineBits;
-}
-
-std::vector<std::vector<int>> ReadChipscope::GetFineDecimals(std::vector<std::vector<int>> input){
-  
-  std::vector<std::vector<int>> fineDecimals = Resize2DVector(m_rowGroupLength, input[0].size());
-
-  for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
-    int offset = m_rowGroupLength;
-    int adcBit = 0;
-    int counter = 0;
-    int bibite = 0;
-    int pixelFineDecimal = 0;
-    std::vector<int> pixelFineBits;
-    for (unsigned int bit = 0; bit < input.size(); bit++){
-      adcBit++;
-      pixelFineBits.push_back(input[bibite * offset + counter][dataLine]);
-      if (adcBit % m_numberOfFineBits == 0 && adcBit > 0 ){
-        adcBit = 0;
-        pixelFineDecimal = ConvertBitsToDecimals(pixelFineBits);
-        fineDecimals[counter][dataLine] = pixelFineDecimal;
-        counter++;
-        bibite = -1;
-        pixelFineBits.clear();
-      }
-      bibite++;
-    }
-  }
-  return fineDecimals;
 }
 
 std::vector<std::vector<int>> ReadChipscope::GetCoarseBits(std::vector<std::vector<int>> input){
@@ -192,32 +135,31 @@ std::vector<std::vector<int>> ReadChipscope::GetCoarseBits(std::vector<std::vect
   return coarseBits;
 }
 
-std::vector<std::vector<int>> ReadChipscope::GetCoarseDecimals(std::vector<std::vector<int>> input){
+std::vector<std::vector<int>> ReadChipscope::GetDecimalOutput(std::vector<std::vector<int> > input, int numberOfBits){
+  // Take a 2D vector containing bits to convert it into a 2D vector containing decimals
   
-  std::vector<std::vector<int>> coarseDecimals = Resize2DVector(m_rowGroupLength, input[0].size());
-  
+  std::vector<std::vector<int>> decimalOutput = Resize2DVector(m_rowGroupLength, input[0].size());
   for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
-    int offset = m_rowGroupLength;
     int adcBit = 0;
     int counter = 0;
-    int bibite = 0;
-    int pixelCoarseDecimal = 0;
-    std::vector<int> pixelCoarseBits;
+    int bitCounter = 0;
+    int pixelDecimal = 0;
+    std::vector<int> pixelBits;
     for (unsigned int bit = 0; bit < input.size(); bit++){
       adcBit++;
-      pixelCoarseBits.push_back(input[bibite * offset + counter][dataLine]);
-      if (adcBit % m_numberOfCoarseBits == 0 && adcBit > 0 ){
+      pixelBits.push_back(input[bitCounter * m_rowGroupLength + counter][dataLine]);
+      if (adcBit % numberOfBits == 0 && adcBit > 0 ){
         adcBit = 0;
-        pixelCoarseDecimal = ConvertBitsToDecimals(pixelCoarseBits);
-        coarseDecimals[counter][dataLine] = pixelCoarseDecimal;
+        pixelDecimal = ConvertBitsToDecimals(pixelBits);
+        decimalOutput[counter][dataLine] = pixelDecimal;
         counter++;
-        bibite = -1;
-        pixelCoarseBits.clear();
+        bitCounter = -1;
+        pixelBits.clear();
       }
-      bibite++;
+      bitCounter++;
     }
   }
-  return coarseDecimals;
+  return decimalOutput;
 }
 
 int ReadChipscope::ConvertBitsToDecimals(std::vector<int> inputBits){
@@ -297,7 +239,7 @@ std::vector<std::vector<int>> ReadChipscope::PrepareVectorisedImage(std::vector<
   int nbOfColumns = 1408; // 32 columns * 44 data lines
   outputImage = Resize2DVector(nbOfLines, nbOfColumns);
   
-    for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
+  for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
     //    std::cout << "Data Line: " << dataLxine << std::endl;
     int tmpRow = 0;
     int tmpCol =  dataLine * (m_numberOfColumnsPerDataLine - 1);
@@ -324,11 +266,11 @@ void ReadChipscope::InverseBits(std::vector<int> input){
 }
 
 void ReadChipscope::SetDataLength(int dataLength){
-    m_dataLength = dataLength;
+  m_dataLength = dataLength;
 }
 
 void ReadChipscope::SetDataStart(int dataStart){
-    m_dataStart = dataStart;
+  m_dataStart = dataStart;
 }
 
 void ReadChipscope::SetNumberPixels(int numberOfPixels){
@@ -337,4 +279,12 @@ void ReadChipscope::SetNumberPixels(int numberOfPixels){
 
 void ReadChipscope::SetNumberGainBits(int numberOfGainBits){
   m_numberOfGainBits = numberOfGainBits;
+}
+
+void ReadChipscope::SetNumberFineBits(int numberOfFineBits){
+  m_numberOfFineBits = numberOfFineBits;
+}
+
+void ReadChipscope::SetNumberCoarseBits(int numberOfCoarseBits){
+  m_numberOfCoarseBits = numberOfCoarseBits;
 }

@@ -67,6 +67,12 @@ int main (int argc, char **argv){
     return 1;
   }
   
+  const std::string OUTPUT_PATH = configFileXML.FirstChildElement("FILE")->FirstChildElement("OUTPUT_PATH")->GetText();
+  if (OUTPUT_PATH == nullptr){
+    std::cerr << "Field not found." << std::endl;
+    return 1;
+  }
+  
   const std::string DATA_OFFSET_XML = configFileXML.FirstChildElement("ANALYSIS")->FirstChildElement("DATA_OFFSET")->GetText();
   if (DATA_OFFSET_XML == nullptr){
     std::cerr << "Field not found." << std::endl;
@@ -137,23 +143,21 @@ int main (int argc, char **argv){
       imageCoarse.insert(imageCoarse.begin(), rowGroupVecCoarse.begin(), rowGroupVecCoarse.end());
     }
   }
-  //  for(auto& row : imageCoarse){
-  //    for(auto& col : row){
-  //      std::cout << col << ";";
-  //    }
-  //    std::cout << std::endl;
-  //  }
-  //
-  
+
   int nbOfLines = imageCoarse.size();
   int nbOfColumns = imageCoarse[0].size();
   //    std::cout << "Size of image -> number of columns: " << imageCoarse[0].size() << ", number of lines: " << imageCoarse.size() << std::endl;
   
+  std::string outputGain = OUTPUT_PATH + "coarse.png";
+  std::string outputFine = OUTPUT_PATH + "coarse.png";
+  std::string outputCoarse = OUTPUT_PATH + "coarse.png";
+
   auto outputRootFile = TFile::Open(OUTPUT_ROOT.c_str(), "RECREATE");
   PlotHistogram gainPlot, coarsePlot, finePlot;
-  gainPlot.CreateScatterPlot("Gain response", "Gain response", "/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/gain.png", nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageGain);
-  coarsePlot.CreateScatterPlot("Coarse response", "Coarse response", "/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/coarse.png", nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageCoarse);
-  finePlot.CreateScatterPlot("Fine response", "Fine response", "/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/fine.png", nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageFine);
+
+  gainPlot.CreateScatterPlot("Gain response", "Gain response", outputGain.c_str(), nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageGain);
+  finePlot.CreateScatterPlot("Fine response", "Fine response", outputFine.c_str(), nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageFine);
+  coarsePlot.CreateScatterPlot("Coarse response", "Coarse response", outputCoarse.c_str(), nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageCoarse);
   
   outputRootFile->Close();
   

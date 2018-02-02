@@ -36,9 +36,12 @@ class ReadChipscope{
     std::vector<std::vector<int>> PrepareVectorisedImage(std::vector<std::vector<int>> input);
     int ConvertBitsToDecimals(std::vector<int> inputBits);
   
+  std::vector<std::vector<int>> Resize2DVector(int nbOfLines, int nbOfColumns);
+  
   void SetDataLength(int dataLength);
   void SetDataStart(int dataStart);
-
+  void SetNumberPixels(int numberOfPixels);
+  void SetNumberGainBits(int numberOfGainBits);
 
   private:
     int m_dataLength;
@@ -54,6 +57,7 @@ class ReadChipscope{
     int m_fineEnd;
     int m_coarseBegin;
     int m_coarseEnd;
+    int m_numberOfColumnsPerDataLine;
 
 };
 #endif /* readChipscope_hpp */

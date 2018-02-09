@@ -8,15 +8,11 @@
 #include "plotHistogram.hpp"
 
 #include <iostream>
-#include <sstream>
-#include <fstream>
 #include <vector>
 #include <string>
 #include <memory>
 #include <algorithm>
-#include <map>
 #include <utility>
-#include <math.h>
 
 #include "TH2I.h"
 #include "TCanvas.h"
@@ -35,12 +31,11 @@ PlotHistogram::~PlotHistogram(){
 void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle, std::string fileName, int rowBinning, int rowMin, int rowMax, int columnBinning, int columnMin, int columnMax, std::vector<std::vector<int>> inputData){
   // Plot an hitogramm from a vector of data set
 
-  std::unique_ptr<TCanvas> canvas (new TCanvas("canvas", "canvas", 900, 900));
+  std::unique_ptr<TCanvas> canvas (new TCanvas("canvas", "canvas", 1200, 1200));
   TH2I *histoToPlot = new TH2I(title.c_str(), histoTitle.c_str(), columnBinning, columnMin, columnMax, rowBinning, rowMin, rowMax-1);
   for (unsigned int row = rowMin; row < rowMax; row++){
     for (unsigned int column = columnMin; column < columnMax; column++){
       histoToPlot->Fill(column, row, inputData[row][column]);
-//      histoToPlot->SetBinContent(column, row, inputData[row][column]);
     }
   }
   
@@ -55,7 +50,11 @@ void PlotHistogram::CreateScatterPlot(std::string title, std::string histoTitle,
 }
 
 void PlotHistogram::ReverseXAxis(TH2I *histo2D){
-  // Remove the current axis
+  /* Remove the current axis and redraw it in a reverse order
+   * Method taken from a ROOT forum:
+   *    https://root-forum.cern.ch/t/inverse-axis/8777/3
+   */
+
   histo2D->GetXaxis()->SetLabelOffset(999);
   histo2D->GetXaxis()->SetTickLength(0);
   
@@ -74,7 +73,11 @@ void PlotHistogram::ReverseXAxis(TH2I *histo2D){
 }
 
 void PlotHistogram:: ReverseYAxis(TH2I *histo2D){
-  // Remove the current axis
+  /* Remove the current axis and redraw it in a reverse order
+   * Method taken from a ROOT forum:
+   *    https://root-forum.cern.ch/t/inverse-axis/8777/3
+   */
+  
   histo2D->GetYaxis()->SetLabelOffset(999);
   histo2D->GetYaxis()->SetTickLength(0);
   

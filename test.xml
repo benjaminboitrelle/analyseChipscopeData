@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf8"?>
 
 <FILE>
-  <INPUT>/Users/ben/PostDoc/006_horseman_OD10_20171207/allSensor/</INPUT>
+  <INPUT>/Users/ben/PostDoc/007_horseman_OD1.7_2017.12.13/fullSensor/</INPUT>
   <FILENAME>horseman</FILENAME>
   <EXTENSION>.prn</EXTENSION>
 <NUMBER_OF_FILES>30</NUMBER_OF_FILES>

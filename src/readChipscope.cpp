@@ -8,14 +8,12 @@
 #include "readChipscope.hpp"
 
 #include <iostream>
-#include <sstream>
 #include <fstream>
 #include <vector>
 #include <string>
 #include <iterator>
 #include <memory>
 #include <algorithm>
-#include <map>
 #include <utility>
 #include <math.h>
 
@@ -30,6 +28,7 @@ ReadChipscope::ReadChipscope(){
   m_numberOfCoarseBits = 5; // Default value according to P2M architecture
   m_rowGroupLength = 224;
   m_gainBegin = 0;
+  m_numberOfRows = 7;
   m_gainEnd = m_rowGroupLength * m_numberOfGainBits;
   m_fineBegin = m_gainEnd;
   m_fineEnd = m_fineBegin + (m_rowGroupLength * m_numberOfFineBits);
@@ -49,11 +48,14 @@ std::vector<std::vector<int>> ReadChipscope::BitReordering(std::vector<std::vect
    * | 24 | 16 | 8  | 0 |
    * | 25 | 17 | 9  | 1 |
    * | 26 | 18 | 10 | 2 |
-   * | 27 | 19 | 11 | 3 |   For row going from 0 to 6
+   * | 27 | 19 | 11 | 3 |   For adc going from 6 to 0
    * | 28 | 20 | 12 | 4 |
    * | 29 | 21 | 13 | 5 |
    * | 30 | 22 | 14 | 6 |
    * | 31 | 23 | 15 | 7 |
+   *
+   * Data is read from bottom to top and from adc 6 to 0.
+   * Moreover, in this method, data is processed column by column and not row by row.
    */
   
   std::vector<std::vector<int>> inputRemapped = Resize2DVector(input.size(), input[0].size());
@@ -63,7 +65,7 @@ std::vector<std::vector<int>> ReadChipscope::BitReordering(std::vector<std::vect
     //    std::cout << "Data line: " << dataLine << std::endl;
     int blockShift = 1;
     int blockCounter = 0;
-    int tmpRow = 7;
+    int tmpRow = m_numberOfRows;
     int offset = 0;
     int endOfColumn = 0;
     int groupRead = 0;
@@ -71,7 +73,7 @@ std::vector<std::vector<int>> ReadChipscope::BitReordering(std::vector<std::vect
       if (bit % m_rowGroupLength == 0 && bit > 0){
         groupRead++;
         //        std::cout << "groupRead * bitGroup = " << groupRead * bitGroup <<  std::endl;
-        tmpRow = 7;
+        tmpRow = m_numberOfRows;
         blockCounter = 0;
         endOfColumn = 0;
         offset = 0;
@@ -85,7 +87,7 @@ std::vector<std::vector<int>> ReadChipscope::BitReordering(std::vector<std::vect
       inputRemapped[bit][dataLine] = input[groupRead * m_rowGroupLength + offset + tmpRow * dataShift + blockShift][dataLine];
       tmpRow--;
       if (tmpRow < 0){
-        tmpRow = 7;
+        tmpRow = m_numberOfRows;
         blockCounter++;
         blockShift++;
         //        std::cout << "---" << std::endl;
@@ -95,7 +97,7 @@ std::vector<std::vector<int>> ReadChipscope::BitReordering(std::vector<std::vect
         blockCounter = 0;
         blockShift = 1;
         offset = 4 * endOfColumn;
-        tmpRow = 7;
+        tmpRow = m_numberOfRows;
         //        std::cout << "-----" << std::endl;
       }
     }
@@ -167,7 +169,7 @@ int ReadChipscope::ConvertBitsToDecimals(std::vector<int> inputBits){
   
   int decimal = 0;
   for (unsigned int bit = 0; bit < inputBits.size(); bit++){
-    decimal += inputBits.at(bit) * pow(2,inputBits.size() - (1 + bit));
+    decimal += inputBits.at(bit) * pow(2, inputBits.size() - (1 + bit));
   }
   return decimal;
 }
@@ -235,9 +237,8 @@ std::vector<std::vector<int>> ReadChipscope::PrepareVectorisedImage(std::vector<
   // Transform the vector of data into a 2D matrix to get the response of a row group
   
   std::vector<std::vector<int>> outputImage;
-  int nbOfLines = 7;
   int nbOfColumns = 1408; // 32 columns * 44 data lines
-  outputImage = Resize2DVector(nbOfLines, nbOfColumns);
+  outputImage = Resize2DVector(m_numberOfRows, nbOfColumns);
   
   for (unsigned int dataLine = 0; dataLine < input[0].size(); dataLine++){
     //    std::cout << "Data Line: " << dataLxine << std::endl;
@@ -287,4 +288,8 @@ void ReadChipscope::SetNumberFineBits(int numberOfFineBits){
 
 void ReadChipscope::SetNumberCoarseBits(int numberOfCoarseBits){
   m_numberOfCoarseBits = numberOfCoarseBits;
+}
+
+void ReadChipscope::SetNumberOfRowsPerBlock(int numberOfRows){
+  m_numberOfRows = numberOfRows;
 }

@@ -24,8 +24,23 @@ using namespace tinyxml2;
 
 int main (int argc, char **argv){
   
+  std::string xmlPath;
+  if (argc < 3 || argc > 4){
+    std::cerr << "Usage: " << argv[0] << " <option(s)> SOURCES "
+    << "Options:\n"
+    << "\t -h,--help\t\tShow this help message\n"
+    << "\t -cfg,--config CONFIGURATION\tSpecify path and name of configuration file to use"
+    << std::endl;
+    return 1;
+  }
+  if (strcmp(argv[1], "-cfg") == 0 || strcmp(argv[1], "--config") == 0){
+    xmlPath = argv[2];
+  }
+  
   XMLDocument configFileXML;
-  XMLError errorResult = configFileXML.LoadFile("/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/test.xml");
+  XMLError errorResult = configFileXML.LoadFile(xmlPath.c_str());
+  //  XMLError errorResult = configFileXML.LoadFile("/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/test.xml");
+  
   if (errorResult != XML_SUCCESS){
     std::cerr << "ERROR! Could not find XML file to read." << std::endl;
     return 1;
@@ -110,7 +125,7 @@ int main (int argc, char **argv){
   const int FINE_SIZE = stoi(FINE_SIZE_XML);
   const int COARSE_SIZE = stoi(COARSE_SIZE_XML);
   
-  int minNbFiles = 1;
+  const int minNbFiles = 1;
   
   std::vector<std::vector<int>> imageCoarse, imageGain, imageFine;
   ReadChipscope chipscopeData;
@@ -143,18 +158,18 @@ int main (int argc, char **argv){
       imageCoarse.insert(imageCoarse.begin(), rowGroupVecCoarse.begin(), rowGroupVecCoarse.end());
     }
   }
-
+  
   int nbOfLines = imageCoarse.size();
   int nbOfColumns = imageCoarse[0].size();
   //    std::cout << "Size of image -> number of columns: " << imageCoarse[0].size() << ", number of lines: " << imageCoarse.size() << std::endl;
   
-  std::string outputGain = OUTPUT_PATH + "coarse.png";
-  std::string outputFine = OUTPUT_PATH + "coarse.png";
+  std::string outputGain = OUTPUT_PATH + "gain.png";
+  std::string outputFine = OUTPUT_PATH + "fine.png";
   std::string outputCoarse = OUTPUT_PATH + "coarse.png";
-
+  
   auto outputRootFile = TFile::Open(OUTPUT_ROOT.c_str(), "RECREATE");
   PlotHistogram gainPlot, coarsePlot, finePlot;
-
+  
   gainPlot.CreateScatterPlot("Gain response", "Gain response", outputGain.c_str(), nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageGain);
   finePlot.CreateScatterPlot("Fine response", "Fine response", outputFine.c_str(), nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageFine);
   coarsePlot.CreateScatterPlot("Coarse response", "Coarse response", outputCoarse.c_str(), nbOfLines, 0, nbOfLines, nbOfColumns, 0, nbOfColumns, imageCoarse);

@@ -11,6 +11,7 @@ To compile the project:
   cmake ..
   make
 ```
+N.B.: ROOT and at least C++11 are required.
 
 
 ## HowTo

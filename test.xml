@@ -4,7 +4,7 @@
   <INPUT>/Users/ben/PostDoc/007_horseman_OD1.7_2017.12.13/fullSensor/</INPUT>
   <FILENAME>horseman</FILENAME>
   <EXTENSION>.prn</EXTENSION>
-<NUMBER_OF_FILES>30</NUMBER_OF_FILES>
+  <NUMBER_OF_FILES>30</NUMBER_OF_FILES>
   <OUTPUT_ROOT>/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/test.root</OUTPUT_ROOT>
   <OUTPUT_PNG>/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/result.png</OUTPUT_PNG>
   <OUTPUT_PATH>/Users/ben/PostDoc/ChipscopeSOLEIL/analyseChipscopeData/output/</OUTPUT_PATH>

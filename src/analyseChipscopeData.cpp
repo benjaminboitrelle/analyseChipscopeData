@@ -149,7 +149,6 @@ int main (int argc, char **argv){
       std::vector<std::vector<int>> fineDecimals = chipscopeData.GetDecimalOutput(fineBits, FINE_SIZE);
       std::vector<std::vector<int>> coarseBits = chipscopeData.GetCoarseBits(rowGroup);
       std::vector<std::vector<int>> coarseDecimals = chipscopeData.GetDecimalOutput(coarseBits, COARSE_SIZE);
-      
       std::vector<std::vector<int>> rowGroupVecGain = chipscopeData.PrepareVectorisedImage(gainDecimals);
       std::vector<std::vector<int>> rowGroupVecFine = chipscopeData.PrepareVectorisedImage(fineDecimals);
       std::vector<std::vector<int>> rowGroupVecCoarse = chipscopeData.PrepareVectorisedImage(coarseDecimals);
